@@ -1,0 +1,35 @@
+{
+  "name": "forge-react-r3f",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "assets:clean": "node scripts/clean-assets.js",
+    "assets:download": "node scripts/download-assets.js",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --fix"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.0.8",
+    "@react-three/fiber": "^9.1.2",
+    "@worldlabsai/forge": "git+ssh://git@github.com/worldlabsai/forge-internal.git#dylan/generate-types-vite-plugin-dts",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "stats.js": "^0.17.0",
+    "three": "^0.172.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@tailwindcss/vite": "^4.1.7",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@types/three": "^0.172.0",
+    "@vitejs/plugin-react": "^4.4.1",
+    "tailwindcss": "^4.1.7",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  }
+}
