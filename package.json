@@ -15,7 +15,7 @@
   "dependencies": {
     "@react-three/drei": "^10.0.8",
     "@react-three/fiber": "^9.1.2",
-    "@worldlabsai/forge": "git+ssh://git@github.com/forge-gfx/forge",
+    "@forge-gfx/forge": "^0.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "stats.js": "^0.17.0",

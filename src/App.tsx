@@ -3,7 +3,7 @@ import { SplatMesh } from "./components/forge/SplatMesh";
 import { ForgeRenderer } from "./components/forge/SplatRenderer";
 import { CameraControls } from "@react-three/drei";
 import { useRef } from "react";
-import type { SplatMesh as ForgeSplatMesh } from "@worldlabsai/forge";
+import type { SplatMesh as ForgeSplatMesh } from "@forge-gfx/forge";
 
 function App() {
   return (
@@ -36,7 +36,7 @@ const Scene = () => {
         <group rotation={[Math.PI, 0, 0]}>
           <SplatMesh
             ref={meshRef}
-            args={[{ url: "/assets/splats/butterfly.wlg" }]}
+            args={[{ url: "/assets/splats/butterfly.spz" }]}
           />
         </group>
       </ForgeRenderer>
