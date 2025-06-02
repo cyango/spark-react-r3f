@@ -6,6 +6,14 @@ In order to use Forge elements declaratively with JSX, we use React Three Fiber'
 
 ## Running the example
 
+First, download the assets:
+
+```bash
+npm run assets:download
+```
+
+Then, run the development server:
+
 ```bash
 npm install
 npm run dev
