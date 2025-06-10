@@ -1,9 +1,9 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { SplatMesh } from "./components/forge/SplatMesh";
-import { ForgeRenderer } from "./components/forge/SplatRenderer";
+import { SplatMesh } from "./components/spark/SplatMesh";
+import { SparkRenderer } from "./components/spark/SparkRenderer";
 import { CameraControls } from "@react-three/drei";
 import { useMemo, useRef } from "react";
-import type { SplatMesh as ForgeSplatMesh } from "@forge-gfx/forge";
+import type { SplatMesh as SparkSplatMesh } from "@sparkjsdev/spark";
 
 function App() {
   return (
@@ -20,10 +20,10 @@ function App() {
  */
 const Scene = () => {
   const renderer = useThree((state) => state.gl);
-  const meshRef = useRef<ForgeSplatMesh>(null);
+  const meshRef = useRef<SparkSplatMesh>(null);
 
-  // Memoize the elements inside the `<ForgeRenderer />` `args` prop so that we don't re-create the `<ForgeRenderer />` on every render
-  const forgeRendererArgs = useMemo(() => {
+  // Memoize the elements inside the `<SparkRenderer />` `args` prop so that we don't re-create the `<SparkRenderer />` on every render
+  const sparkRendererArgs = useMemo(() => {
     return { renderer };
   }, [renderer]);
 
@@ -45,12 +45,12 @@ const Scene = () => {
   return (
     <>
       <CameraControls />
-      <ForgeRenderer args={[forgeRendererArgs]}>
+      <SparkRenderer args={[sparkRendererArgs]}>
         {/* This particular splat mesh is upside down */}
         <group rotation={[Math.PI, 0, 0]}>
           <SplatMesh ref={meshRef} args={[splatMeshArgs]} />
         </group>
-      </ForgeRenderer>
+      </SparkRenderer>
     </>
   );
 };
