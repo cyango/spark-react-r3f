@@ -4,12 +4,19 @@ import { SparkRenderer } from "./components/spark/SparkRenderer";
 import { CameraControls } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import type { SplatMesh as SparkSplatMesh } from "@sparkjsdev/spark";
+import { noEvents, PointerEvents } from "@react-three/xr/dist/events";
+import { createXRStore, XR } from "@react-three/xr/dist/xr";
 
 function App() {
+  const store = createXRStore();
+
   return (
     <div className="flex h-screen w-screen">
-      <Canvas gl={{ antialias: false }}>
-        <Scene />
+      <Canvas gl={{ antialias: false }} events={noEvents}>
+        <PointerEvents batchEvents={false} />
+        <XR store={store}>
+          <Scene />
+        </XR>
       </Canvas>
     </div>
   );
@@ -31,7 +38,7 @@ const Scene = () => {
   const splatMeshArgs = useMemo(
     () =>
       ({
-        url: "/assets/splats/butterfly.spz",
+        url: "/assets/berbequim.ply",
       }) as const,
     [],
   );
@@ -45,12 +52,12 @@ const Scene = () => {
   return (
     <>
       <CameraControls />
-      <SparkRenderer args={[sparkRendererArgs]}>
-        {/* This particular splat mesh is upside down */}
-        <group rotation={[Math.PI, 0, 0]}>
+      <group rotation={[Math.PI, 0, 0]}>
+        <SparkRenderer args={[sparkRendererArgs]}>
+          {/* This particular splat mesh is upside down */}
           <SplatMesh ref={meshRef} args={[splatMeshArgs]} />
-        </group>
-      </SparkRenderer>
+        </SparkRenderer>
+      </group>
     </>
   );
 };
