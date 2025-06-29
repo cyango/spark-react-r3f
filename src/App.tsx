@@ -1,17 +1,27 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { SplatMesh } from "./components/spark/SplatMesh";
 import { SparkRenderer } from "./components/spark/SparkRenderer";
-import { CameraControls } from "@react-three/drei";
+import { CameraControls, Resize } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import type { SplatMesh as SparkSplatMesh } from "@sparkjsdev/spark";
 import { noEvents, PointerEvents } from "@react-three/xr/dist/events";
 import { createXRStore, XR } from "@react-three/xr/dist/xr";
+import Panorama from "./components/Panorama";
 
 function App() {
-  const store = createXRStore();
+  const store = createXRStore({
+    emulate: true,
+  });
 
   return (
     <div className="flex h-screen w-screen">
+      <img
+        id="default360Image"
+        src="/assets/default360Image.jpg"
+        style={{ display: "none" }}
+        alt="default"
+      />
+
       <Canvas gl={{ antialias: false }} events={noEvents}>
         <PointerEvents batchEvents={false} />
         <XR store={store}>
@@ -38,7 +48,7 @@ const Scene = () => {
   const splatMeshArgs = useMemo(
     () =>
       ({
-        url: "/assets/berbequim.ply",
+        url: "/assets/felsberg moto.spz",
       }) as const,
     [],
   );
@@ -52,12 +62,23 @@ const Scene = () => {
   return (
     <>
       <CameraControls />
-      <group rotation={[Math.PI, 0, 0]}>
-        <SparkRenderer args={[sparkRendererArgs]}>
-          {/* This particular splat mesh is upside down */}
-          <SplatMesh ref={meshRef} args={[splatMeshArgs]} />
-        </SparkRenderer>
-      </group>
+
+      <Resize>
+        <group rotation={[Math.PI, 0, 0]}>
+          <SparkRenderer args={[sparkRendererArgs]}>
+            {/* This particular splat mesh is upside down */}
+            <SplatMesh
+              ref={meshRef}
+              args={[splatMeshArgs]}
+              onClick={() => {
+                console.log("clicked");
+              }}
+            />
+          </SparkRenderer>
+        </group>
+      </Resize>
+
+      <Panorama />
     </>
   );
 };
