@@ -3,7 +3,10 @@ import { SplatMesh } from "./components/spark/SplatMesh";
 import { SparkRenderer } from "./components/spark/SparkRenderer";
 import { CameraControls, Resize } from "@react-three/drei";
 import { useMemo, useRef } from "react";
-import type { SplatMesh as SparkSplatMesh } from "@sparkjsdev/spark";
+import type {
+  SplatMesh as SparkSplatMesh,
+  SplatMeshOptions,
+} from "@sparkjsdev/spark";
 import { noEvents, PointerEvents } from "@react-three/xr/dist/events";
 import { createXRStore, XR } from "@react-three/xr/dist/xr";
 import Panorama from "./components/Panorama";
@@ -45,10 +48,13 @@ const Scene = () => {
   }, [renderer]);
 
   // Memoize the `SplatMesh` `args` prop so that we don't re-create the `SplatMesh` on every render
-  const splatMeshArgs = useMemo(
+  const splatMeshArgs: SplatMeshOptions = useMemo(
     () =>
       ({
         url: "/assets/splats/fireplace.spz",
+        onLoad: () => {
+          console.log("loaded");
+        },
       }) as const,
     [],
   );
@@ -70,13 +76,13 @@ const Scene = () => {
             <SplatMesh
               ref={meshRef}
               args={[splatMeshArgs]}
-              onClick={() => {
-                console.log("clicked");
-              }}
+              // onClick={() => {
+              //   console.log("clicked");
+              // }}
               // @ts-ignore
-              onLoad={() => {
-                console.log("loaded");
-              }}
+              // onLoad={() => {
+              //   console.log("loaded");
+              // }}
             />
           </SparkRenderer>
         </group>
