@@ -48,7 +48,7 @@ const Scene = () => {
   const splatMeshArgs = useMemo(
     () =>
       ({
-        url: "/assets/felsberg moto.spz",
+        url: "/assets/splats/fireplace.spz",
       }) as const,
     [],
   );
@@ -72,6 +72,10 @@ const Scene = () => {
               args={[splatMeshArgs]}
               onClick={() => {
                 console.log("clicked");
+              }}
+              // @ts-ignore
+              onLoad={() => {
+                console.log("loaded");
               }}
             />
           </SparkRenderer>
