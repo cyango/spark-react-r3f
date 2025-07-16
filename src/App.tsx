@@ -2,7 +2,10 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { SplatMesh } from "./components/spark/SplatMesh";
 import { SparkRenderer } from "./components/spark/SparkRenderer";
 import { CameraControls, Resize } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
+import * as THREE from "three";
+import { SplatMesh as SplatMeshObject } from "@sparkjsdev/spark";
+
 import type {
   SplatMesh as SparkSplatMesh,
   SplatMeshOptions,
@@ -10,6 +13,38 @@ import type {
 import { noEvents, PointerEvents } from "@react-three/xr/dist/events";
 import { createXRStore, XR } from "@react-three/xr/dist/xr";
 import Panorama from "./components/Panorama";
+
+const ClickHandler = () => {
+  const { gl, camera, scene } = useThree();
+
+  useEffect(() => {
+    const raycaster = new THREE.Raycaster();
+
+    const onClick = (event: MouseEvent) => {
+      const rect = gl.domElement.getBoundingClientRect();
+
+      // Convert screen coords to normalized device coords
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      const clickCoords = new THREE.Vector2(x, y);
+
+      raycaster.setFromCamera(clickCoords, camera);
+      const hits = raycaster.intersectObjects(scene.children, true);
+
+      const hit = hits.find(h => h.object instanceof SplatMeshObject);
+      if (hit) {
+        console.log("✅ Clicked a SplatMesh!", hit.object);
+      }
+    };
+
+    gl.domElement.addEventListener("click", onClick);
+    return () => {
+      gl.domElement.removeEventListener("click", onClick);
+    };
+  }, [gl, camera, scene]);
+
+  return null;
+};
 
 function App() {
   const store = createXRStore({
@@ -26,7 +61,6 @@ function App() {
       />
 
       <Canvas gl={{ antialias: false }} events={noEvents}>
-        <PointerEvents batchEvents={false} />
         <XR store={store}>
           <Scene />
         </XR>
@@ -52,9 +86,9 @@ const Scene = () => {
     () =>
       ({
         url: "/assets/splats/fireplace.spz",
-        onLoad: () => {
-          console.log("loaded");
-        },
+        // onLoad: () => {
+        //   console.log("loaded");
+        // },
       }) as const,
     [],
   );
@@ -76,19 +110,13 @@ const Scene = () => {
             <SplatMesh
               ref={meshRef}
               args={[splatMeshArgs]}
-              // onClick={() => {
-              //   console.log("clicked");
-              // }}
-              // @ts-ignore
-              // onLoad={() => {
-              //   console.log("loaded");
-              // }}
             />
           </SparkRenderer>
         </group>
       </Resize>
 
       <Panorama />
+      <ClickHandler />
     </>
   );
 };
