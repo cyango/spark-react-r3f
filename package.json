@@ -16,7 +16,7 @@
     "@react-three/drei": "10.0.8",
     "@react-three/fiber": "9.1.2",
     "@react-three/xr": "6.6.17",
-    "@sparkjsdev/spark": "0.1.1",
+    "@sparkjsdev/spark": "0.1.8",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "stats.js": "^0.17.0",

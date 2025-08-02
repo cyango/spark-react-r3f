@@ -31,7 +31,7 @@ const ClickHandler = () => {
       raycaster.setFromCamera(clickCoords, camera);
       const hits = raycaster.intersectObjects(scene.children, true);
 
-      const hit = hits.find(h => h.object instanceof SplatMeshObject);
+      const hit = hits.find((h) => h.object instanceof SplatMeshObject);
       if (hit) {
         console.log("✅ Clicked a SplatMesh!", hit.object);
       }
@@ -107,10 +107,7 @@ const Scene = () => {
         <group rotation={[Math.PI, 0, 0]}>
           <SparkRenderer args={[sparkRendererArgs]}>
             {/* This particular splat mesh is upside down */}
-            <SplatMesh
-              ref={meshRef}
-              args={[splatMeshArgs]}
-            />
+            <SplatMesh ref={meshRef} args={[splatMeshArgs]} />
           </SparkRenderer>
         </group>
       </Resize>
