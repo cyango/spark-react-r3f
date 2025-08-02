@@ -13,7 +13,7 @@ import type {
 import { noEvents } from "@react-three/xr/dist/events";
 import { useXR } from "@react-three/xr";
 import { createXRStore, XR } from "@react-three/xr/dist/xr";
-import Panorama from "./components/Panorama";
+// import Panorama from "./components/Panorama";
 
 const ClickHandler = () => {
 	const { gl, camera, scene } = useThree();
@@ -21,75 +21,175 @@ const ClickHandler = () => {
 
 	useEffect(() => {
 		const raycaster = new THREE.Raycaster();
+		let lastMoveTime = 0;
+		const moveThrottle = 16; // ~60fps throttling
 
-		// Regular mouse click handling
-		const onMouseClick = (event: MouseEvent) => {
-			// Skip if in XR mode
-			if (xr.session) return;
-
+		// Helper function to perform raycasting from screen coordinates
+		const performRaycastFromScreen = (clientX: number, clientY: number) => {
 			const rect = gl.domElement.getBoundingClientRect();
-			const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-			const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-			const clickCoords = new THREE.Vector2(x, y);
+			const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+			const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+			const coords = new THREE.Vector2(x, y);
 
-			raycaster.setFromCamera(clickCoords, camera);
+			raycaster.setFromCamera(coords, camera);
 			const hits = raycaster.intersectObjects(scene.children, true);
-			const hit = hits.find((h) => h.object instanceof SplatMeshObject);
+			return hits.find((h) => h.object instanceof SplatMeshObject);
+		};
+
+		// Regular DOM event handlers
+		const onPointerDown = (event: PointerEvent) => {
+			if (xr.session) return;
+			const hit = performRaycastFromScreen(event.clientX, event.clientY);
 			if (hit) {
-				console.log("✅ Clicked a SplatMesh!", hit.object);
+				console.log("👆 Pointer Down on SplatMesh!", hit.object, hit.point);
 			}
 		};
 
-		// XR input handling
-		const handleXRSelect = (event: any) => {
-			if (!xr.session) return;
+		const onPointerUp = (event: PointerEvent) => {
+			if (xr.session) return;
+			const hit = performRaycastFromScreen(event.clientX, event.clientY);
+			if (hit) {
+				console.log("👆 Pointer Up on SplatMesh!", hit.object, hit.point);
+			}
+		};
+
+		const onPointerMove = (event: PointerEvent) => {
+			if (xr.session) return;
+
+			// Throttle pointer move events for performance
+			const now = Date.now();
+			if (now - lastMoveTime < moveThrottle) return;
+			lastMoveTime = now;
+
+			const hit = performRaycastFromScreen(event.clientX, event.clientY);
+			if (hit) {
+				console.log("👆 Pointer Move on SplatMesh!", hit.object, hit.point);
+			}
+		};
+
+		const onPointerEnter = (event: PointerEvent) => {
+			if (xr.session) return;
+			const hit = performRaycastFromScreen(event.clientX, event.clientY);
+			if (hit) {
+				console.log("👆 Pointer Enter SplatMesh!", hit.object);
+			}
+		};
+
+		const onPointerLeave = (event: PointerEvent) => {
+			if (xr.session) return;
+			const hit = performRaycastFromScreen(event.clientX, event.clientY);
+			if (hit) {
+				console.log("👆 Pointer Leave SplatMesh!", hit.object);
+			}
+		};
+
+		const onClick = (event: MouseEvent) => {
+			if (xr.session) return;
+			const hit = performRaycastFromScreen(event.clientX, event.clientY);
+			if (hit) {
+				console.log("✅ Click on SplatMesh!", hit.object, hit.point);
+			}
+		};
+
+		// Helper function to perform XR raycasting
+		const performXRRaycast = (event: any, logMessage: string) => {
+			if (!xr.session) return null;
 
 			const inputSource = event.inputSource;
-			if (!inputSource || !inputSource.targetRaySpace) return;
+			if (!inputSource || !inputSource.targetRaySpace) return null;
 
-			// Get the pose of the controller's target ray
 			const frame = event.frame;
-			if (!xr.originReferenceSpace) return;
+			if (!xr.originReferenceSpace) return null;
 
 			const pose = frame.getPose(
 				inputSource.targetRaySpace,
 				xr.originReferenceSpace,
 			);
+			if (!pose) return null;
 
-			if (pose) {
-				const transform = pose.transform;
-				const origin = new THREE.Vector3(
-					transform.position.x,
-					transform.position.y,
-					transform.position.z,
-				);
-				const direction = new THREE.Vector3(
-					-transform.orientation.x,
-					-transform.orientation.y,
-					-transform.orientation.z,
-				).normalize();
+			const transform = pose.transform;
+			const origin = new THREE.Vector3(
+				transform.position.x,
+				transform.position.y,
+				transform.position.z,
+			);
+			const direction = new THREE.Vector3(
+				-transform.orientation.x,
+				-transform.orientation.y,
+				-transform.orientation.z,
+			).normalize();
 
-				raycaster.set(origin, direction);
-				const hits = raycaster.intersectObjects(scene.children, true);
-				const hit = hits.find((h) => h.object instanceof SplatMeshObject);
-				if (hit) {
-					console.log("✅ Clicked a SplatMesh in XR!", hit.object);
-				}
+			raycaster.set(origin, direction);
+			const hits = raycaster.intersectObjects(scene.children, true);
+			const hit = hits.find((h) => h.object instanceof SplatMeshObject);
+
+			if (hit) {
+				console.log(logMessage, hit.object, hit.point);
 			}
+
+			return hit;
 		};
 
-		// Add listeners
-		gl.domElement.addEventListener("click", onMouseClick);
+		// XR input event handlers
+		const handleXRSelect = (event: any) => {
+			performXRRaycast(event, "🎮 XR Select on SplatMesh!");
+		};
 
-		// XR session event listeners
+		const handleXRSelectStart = (event: any) => {
+			performXRRaycast(event, "🎮 XR Select Start on SplatMesh!");
+		};
+
+		const handleXRSelectEnd = (event: any) => {
+			performXRRaycast(event, "🎮 XR Select End on SplatMesh!");
+		};
+
+		const handleXRSqueeze = (event: any) => {
+			performXRRaycast(event, "🤏 XR Squeeze on SplatMesh!");
+		};
+
+		const handleXRSqueezeStart = (event: any) => {
+			performXRRaycast(event, "🤏 XR Squeeze Start on SplatMesh!");
+		};
+
+		const handleXRSqueezeEnd = (event: any) => {
+			performXRRaycast(event, "🤏 XR Squeeze End on SplatMesh!");
+		};
+
+		// Add DOM event listeners
+		gl.domElement.addEventListener("click", onClick);
+		gl.domElement.addEventListener("pointerdown", onPointerDown);
+		gl.domElement.addEventListener("pointerup", onPointerUp);
+		gl.domElement.addEventListener("pointermove", onPointerMove);
+		gl.domElement.addEventListener("pointerenter", onPointerEnter);
+		gl.domElement.addEventListener("pointerleave", onPointerLeave);
+
+		// Add XR session event listeners
 		if (xr.session) {
 			xr.session.addEventListener("select", handleXRSelect);
+			xr.session.addEventListener("selectstart", handleXRSelectStart);
+			xr.session.addEventListener("selectend", handleXRSelectEnd);
+			xr.session.addEventListener("squeeze", handleXRSqueeze);
+			xr.session.addEventListener("squeezestart", handleXRSqueezeStart);
+			xr.session.addEventListener("squeezeend", handleXRSqueezeEnd);
 		}
 
 		return () => {
-			gl.domElement.removeEventListener("click", onMouseClick);
+			// Remove DOM event listeners
+			gl.domElement.removeEventListener("click", onClick);
+			gl.domElement.removeEventListener("pointerdown", onPointerDown);
+			gl.domElement.removeEventListener("pointerup", onPointerUp);
+			gl.domElement.removeEventListener("pointermove", onPointerMove);
+			gl.domElement.removeEventListener("pointerenter", onPointerEnter);
+			gl.domElement.removeEventListener("pointerleave", onPointerLeave);
+
+			// Remove XR session event listeners
 			if (xr.session) {
 				xr.session.removeEventListener("select", handleXRSelect);
+				xr.session.removeEventListener("selectstart", handleXRSelectStart);
+				xr.session.removeEventListener("selectend", handleXRSelectEnd);
+				xr.session.removeEventListener("squeeze", handleXRSqueeze);
+				xr.session.removeEventListener("squeezestart", handleXRSqueezeStart);
+				xr.session.removeEventListener("squeezeend", handleXRSqueezeEnd);
 			}
 		};
 	}, [gl, camera, scene, xr]);
@@ -139,7 +239,7 @@ const Scene = () => {
 	const splatMeshArgs: SplatMeshOptions = useMemo(
 		() =>
 			({
-				url: "/assets/splats/fireplace.spz",
+				url: "/assets/splats/sutro.zip",
 				// onLoad: () => {
 				//   console.log("loaded");
 				// },
